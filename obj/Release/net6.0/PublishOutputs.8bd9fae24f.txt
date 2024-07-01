@@ -1,0 +1,1 @@
+/home/ubuntu/BitcoinPriceBlazorApp/bin/Release/net6.0/publish/web.config

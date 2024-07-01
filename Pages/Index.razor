@@ -1,0 +1,42 @@
+@page "/"
+
+<PageTitle>Bitcoin Price</PageTitle>
+
+<h1>Bitcoin Price</h1>
+
+<div>
+    <p>The current price of Bitcoin is: <strong>@bitcoinPrice</strong></p>
+    <button @onclick="FetchBitcoinPrice">Refresh</button>
+</div>
+
+@code {
+    private string bitcoinPrice = "Loading...";
+
+    protected override async Task OnInitializedAsync()
+    {
+        await FetchBitcoinPrice();
+    }
+
+    private async Task FetchBitcoinPrice()
+    {
+        bitcoinPrice = "Fetching...";
+        try
+        {
+            using (var httpClient = new HttpClient())
+            {
+                var response = await httpClient.GetAsync("https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd");
+                response.EnsureSuccessStatusCode();
+
+                var jsonResponse = await response.Content.ReadAsStringAsync();
+                var priceData = System.Text.Json.JsonDocument.Parse(jsonResponse);
+                var price = priceData.RootElement.GetProperty("bitcoin").GetProperty("usd").GetDecimal();
+
+                bitcoinPrice = $"${price}";
+            }
+        }
+        catch (Exception ex)
+        {
+            bitcoinPrice = $"Error: {ex.Message}";
+        }
+    }
+}
